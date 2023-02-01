@@ -55,8 +55,7 @@ class Cleaner():
         
         elif sheet_name == 'Tabela 2':
             
-            
-            df = cl('Tabela 2')       
+            df = pd.read_excel(pd.read_pickle(os.path.join(self.root, self.data)), sheet_name = str(sheet_name), index_col = 1)   
             df = df.iloc[3:,:]
             df.columns = df.iloc[0,:]
             idx = list(df.index)

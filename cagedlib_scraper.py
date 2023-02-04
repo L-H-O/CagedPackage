@@ -11,11 +11,36 @@ import pickle
 from bs4 import BeautifulSoup
 
 #%%  
-class Scraper():
+class Scraper:
+    
+    """ 
+    Scrapes New Caged data
+    
+    """
     
     def __init__(self, root = None, home = os.getcwd(), url = "http://pdet.mte.gov.br/novo-caged"
                  , aux = "http://pdet.mte.gov.br", name = 'Caged'):
         
+        """ 
+        
+        Sets up the the database root and urls to be scraped
+        
+        :param root: Directory
+        :type root: str
+        
+        :param home: Path
+        :type home: str
+        
+        :param url: Link
+        :type url: str
+        
+        :param aux: Link
+        :type aux: str
+        
+        :param name: Database name
+        :type name: str
+        
+        """
         self.home = home
         self.url = url
         self.aux = aux
@@ -32,7 +57,18 @@ class Scraper():
             
     def scrap_caged(self, update = False):
         
+        """
+        
+        Scraps caged data
+        
+        :param update: If True, scrapes new data
+        :type update: Boolean 
+        
+        """
+        
         if update == True:
+            
+            print('Scraping data...')
             
             self.clear_root()
             self.create_root()
@@ -53,20 +89,40 @@ class Scraper():
             
             if len(os.listdir(self.root)) > 0:
                 
-                print('Dados brutos existentes não foram atualizados')
+                print('Existing raw data not updated')
                 
             else:
                 
-                print('Não constam dados no diretório, raspando...')
+                print('No existing raw data detected, scraping...')
                 self.scrap_caged(True)
                                
     def _dumper(self, filename, filecontent):
+        
+        """
+        
+        Pickles and dumps the data into the root directory
+        
+        :param filename: Name of the file
+        :type filename: str
+        
+        :param filecontent: Content of the file
+        :type filecontent: bytes
+        
+        """
                     
         with open(os.path.join(self.root, filename + '.pickle'), 'wb') as handle:
                 
                 return pickle.dump(filecontent, handle)
                                 
     def clear_root(self, rmdir = False):
+        
+        """ 
+        Auxiliar function that cleans the root if an update is requested
+        
+        :param rmdir: Removes root if called
+        :type rmdir: Boolean
+        
+        """
         
         if rmdir == False:
             
@@ -90,10 +146,15 @@ class Scraper():
                             
     def create_root(self):
         
+        """
+        Auxiliar function that creates root if upddate is called
+        
+        """
+        
         try:
             
             os.mkdir(os.path.join(self.home,'raw_caged'))
             self.root = os.path.join(self.home, 'raw_caged')  
             
         except FileExistsError:  
-            pass            
+            pass           

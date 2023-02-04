@@ -208,17 +208,19 @@ class Cleaner:
         
         if type(series) == list and len(series) > 1:
         
-            return list(map(lambda x: l(x), series))
+            return list(map(l, series))
         
-        else:
-            
-            if type(series) == list:
-            
-                series = str(series[0])
-                
-            else: series = str(series)
+        elif type(series) == list:
+                                    
+            series = str(series[0])
             
             return l(series)
+                
+        else: 
+            
+            series = str(series)
+            
+            return l(series
             
 
 

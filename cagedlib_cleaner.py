@@ -7,10 +7,10 @@ Created on Wed Feb  1 15:58:52 2023
 import os
 import dateparser as dp
 import pandas as pd
+import warnings; warnings.filterwarnings("ignore") 
 
 from cagedlib_scraper import Scraper
 from pandas.tseries.offsets import DateOffset
-
 #%%
 class Cleaner:
     
@@ -78,8 +78,7 @@ class Cleaner:
             df = df.iloc[1:,:]
             
             cols = list(df.columns)
-            ncols = [i[1] + ' - com ajuste' for i in enumerate(cols) if i[0] > 3]
-            cols[4:9] = ncols
+            cols[4:9] = [i[1] + ' - com ajuste' for i in enumerate(cols) if i[0] > 3]            
             df.columns = cols
             
             return df
@@ -105,8 +104,7 @@ class Cleaner:
             df = df.iloc[1:,:]
 
             cols = list(df.columns)
-            ncols = [i[1] + ' - acumulado' for i in enumerate(cols) if i[0] > 3]
-            cols[4:9] = ncols
+            cols[4:9] = [i[1] + ' - acumulado' for i in enumerate(cols) if i[0] > 3]
             df.columns = cols
             
             return df
@@ -117,10 +115,9 @@ class Cleaner:
             df = df.iloc[3:,1:]
             df.columns = df.iloc[0,:]
             df.drop(df.index[1:3], inplace = True)
-            df = df.iloc[1:,:]         
+            df = df.iloc[1:-3,:].fillna('---')         
             df.index.name = 'UF'
-            df.dropna(inplace = True)
-            
+                        
             dates = df.columns[2].split('-')
             date = dp.parse(dates[0]).strftime("%b-%y")
 
@@ -152,8 +149,8 @@ class Cleaner:
             
             return df
         
-        elif sheet_name == 'Tabela 6' or sheet_name == 'Tabela 6.1':
-            
+        elif sheet_name == 'Tabela 6' or sheet_name == 'Tabela 6.1' or sheet_name == 'Tabela 7' or sheet_name == 'Tabela 7.1':
+                         
             df = pd.read_excel(pd.read_pickle(os.path.join(self.root, self.data)), sheet_name = str(sheet_name), index_col = 1)
             df = df.iloc[3:,:-4]
             
@@ -163,7 +160,8 @@ class Cleaner:
             x.index = x.iloc[:,0] = x.iloc[:,0].apply(lambda x : dp.parse(x))
             x.index.name = 'Date'
             x = x.iloc[:,1:]
-            x.rename(columns = {x.columns[0]:'Setor'}, inplace = True)
+            string ='Setor' if sheet_name == 'Tabela 6' or sheet_name == 'Tabela 6.1' else 'Nível Territorial'
+            x.rename(columns = {x.columns[0]: string}, inplace = True)
             
             df = x.T
             df.dropna(inplace = True)
@@ -171,9 +169,25 @@ class Cleaner:
             
             return df
         
+        elif sheet_name == 'Tabela 8' or sheet_name == 'Tabela 8.1':
+            
+            df = pd.read_excel(pd.read_pickle(os.path.join(self.root, self.data)), sheet_name = str(sheet_name), index_col = 1)
+            df = df.iloc[3:,1:-4]
+            df.iloc[0,2:] = df.iloc[0,2:].ffill()
+            df.iloc[0,2:] = df.iloc[0,2:].apply(lambda x: dp.parse(x))
+            df.drop(df.index[1:3], inplace = True)
+
+            df.iloc[0,0] = df.iloc[0,0][1:]
+            df.iloc[0,1] = df.iloc[0,1][1:]
+            df.columns = df.iloc[0,:]
+            df = df.iloc[1:-5,:].fillna('---')
+            
+            return df
+
+        
         elif sheet_name == 'Tabela 9':
             
-            df = pd.read_excel(pd.read_pickle(os.path.join(self.root, self.data)), sheet_name = str(sheet_name),    header = 4, parse_dates = ['Mês'])
+            df = pd.read_excel(pd.read_pickle(os.path.join(self.root, self.data)), sheet_name = str(sheet_name), header = 4, parse_dates = ['Mês'])
             df = df.iloc[:,1:]
             df.dropna(inplace = True)
             
@@ -220,12 +234,4 @@ class Cleaner:
             
             series = str(series)
             
-            return l(series
-            
-
-
-
-        
-        
-
-
+            return l(series)
